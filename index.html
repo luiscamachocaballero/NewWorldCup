@@ -1,0 +1,154 @@
+<DOCTYPE html>
+<html>
+<head>
+  <title>Country Dropdown and Ranking Table</title>
+</head>
+<body>
+  <h1> A new football world cup qualification</h1>
+<p> For almost 100 years qualifications for the Football World Cup have been played inside continental regions. That built fierce rivalries and unforgettable derby matches. Overall, this system assured representation of all continents in the final games, in the great World Cup. But everything changes, and here we propose a new deal: intercontinental qualifications, or better said, qualifications based on the FIFA's ranking instead of the geographical location of participants. We stand this way is better for many reasons: </p> 
+    <ol>
+        <li>All countries would play intercontinental games from the very beginning, this way, the competition would be a real World Cup since the qualification stages </li>
+        <li>The final games, the World Cup properly, would be played by the 32 best countries, streaming to the global audience the best ever show</li>
+        <li>Now, considering inclusion, FIFA elevated the number of participants from 48 to 32. You know 48 is an awful number and there will be awful matches. With our proposal, the final fest returns to 32 teams but satisfying inclusion in the previous stages</li>
+        <li>Less but better matches, preserving integrity and health of players, the main characters of this show!</li>
+        <li>Finally, FIFA's ranking will be put to the test through intercontinental matches testing the real comparative level among countries which, now, rarely compite</li>          
+    </ol>
+<p>In summary, the tournament would turn into a real World Cup, more competitive and more inclusive.</p>
+  <h3>Select up to 4 FIFA's World Cup host countries</h3>
+  <p>In our proposal, as usual, there is a final stage with 32 teams, composed of the host countries and the qualified countries. We envision that host countries could be up to 4, and then qualified countries would be from 31 to just 28. Let's imagine how would be this system! Let's go!. From the dropdown below, choose up to 4 host countries. To select, roll the dropdown, click on your first selection, and then roll again and push CTRL and click for the next ones. If you select 1 or 2 host countries, the previous stages will be disputed into 15 groups; if you choose 3 or 4 hosts, the groups will be 14</p>
+  <form>
+    <select id="countryDropdown" multiple size="4">
+      <!-- Dropdown options will be populated dynamically -->
+    </select>
+    <br><br>
+    <button type="button" onclick="showSelectedCountries()">Show Host Countries</button>
+  </form>
+  <h4>The host countries are:</h4>
+  <div id="hostCountries"></div>
+<p>We called to the previous stages: World Cup Semifinals, World Cup Quarter-finals and World Cup Regional Stage. If the groups are 15, the World Cup semifinals will be disputed by the best 75 countries plus the 15 countries qualified in the World Cup Quarter-finals. The Quarter-final will be disputed by the countries ranked between 76th and 150th positions plus the 15 countries qualified from the World Cup Regional Stage. The Regional Stage is disputed by the countries ranked between 151th and 208th positions, and this is the only local stage, that means countries compite against their rivals from the same continental federation, from this stage qualified 3 countries per each continental federation. Obviously, host countries qualified directly without dispute qualifications, then, all host are sacked from ranking before form the groups.</p>
+<p> If the groups are 14, the figures are 70 plus 14 in the Semifinals, from 71th to 140th plus 14 in the Quarter-finals and countries from 141th to 208th in the Regional Stage. To see the groups in each stage, push the buttoms below</p>    
+<h4> The 2 best teams of each group of the Semifinals stage qualify for the World Cup FINALS!</h4>
+  <button onclick="displayCSV('semi')">World Cup Semifinals</button>
+  <div id="tableContainerSemi"></div>
+
+  <button onclick="displayCSV('quarter')">World Cup Quarter-finals</button>
+  <div id="tableContainerQuarter"></div>
+  
+  <script>
+    // Function to populate the dropdown options from countries.csv
+    function populateDropdown() {
+      fetch('countries.csv')
+        .then(response => response.text())
+        .then(data => {
+          const lines = data.split('\n');
+          const dropdown = document.getElementById('countryDropdown');
+          lines.forEach(line => {
+            const country = line.split(',')[0].trim();
+            const option = document.createElement('option');
+            option.text = country;
+            dropdown.add(option);
+          });
+        })
+        .catch(error => console.log(error));
+    }
+
+    // Function to show selected countries under the hostCountries div
+    function showSelectedCountries() {
+      const dropdown = document.getElementById('countryDropdown');
+      const selectedCountries = Array.from(dropdown.selectedOptions, option => option.text);
+      const hostCountriesDiv = document.getElementById('hostCountries');
+      hostCountriesDiv.innerHTML = selectedCountries.join(', ');
+    }
+
+    // Function to display the CSV data
+    function displayCSV(argument) {
+      const dropdown = document.getElementById('countryDropdown');
+      const selectedCountries = Array.from(dropdown.selectedOptions, option => option.text);
+      const numColumns = selectedCountries.length >= 0 && selectedCountries.length <= 2 ? 15 : 14;
+
+      fetch('ranking.csv')
+        .then(response => response.text())
+        .then(data => {
+          const lines = data.split('\n');
+          const table = document.createElement('table');
+
+          // Filter and extract the country column data
+          const countries = lines.map(line => line.split(',')[1]);
+          const countriesRanked = countries.slice(1).filter(country => !selectedCountries.includes(country));
+
+          // Split the data into the desired rows
+          let rows;
+          if (argument === 'semi') {
+            rows = [
+              countriesRanked.slice(numColumns * 0, numColumns * 1),
+              countriesRanked.slice(numColumns * 1, numColumns * 2).reverse(),
+              countriesRanked.slice(numColumns * 2, numColumns * 3),
+              countriesRanked.slice(numColumns * 3, numColumns * 4).reverse(),
+              countriesRanked.slice(numColumns * 4, numColumns * 5)
+            ];
+          } else {
+            rows = [
+              countriesRanked.slice(numColumns * 5, numColumns * 6).reverse(),
+              countriesRanked.slice(numColumns * 6, numColumns * 7),
+              countriesRanked.slice(numColumns * 7, numColumns * 8).reverse(),
+              countriesRanked.slice(numColumns * 8, numColumns * 9),
+              countriesRanked.slice(numColumns * 9, numColumns * 10).reverse()
+            ];
+          }
+
+          // Generate the table rows and cells with appropriate data
+          for (let i = 0; i < rows.length; i++) {
+            const row = document.createElement('tr');
+
+            for (let j = 0; j < numColumns; j++) {
+              const cell = document.createElement(i === 0 ? 'th' : 'td');
+              cell.textContent = rows[i][j];
+              row.appendChild(cell);
+            }
+
+            table.appendChild(row);
+          }
+      // Add an empty row
+      	  const emptyRow = document.createElement('tr');
+      	  for (let j = 0; j < numColumns; j++) {
+            const cell = document.createElement('td');
+            emptyRow.appendChild(cell);
+          }
+      	  table.appendChild(emptyRow);
+          // Generate headers for each column
+          const headerRow2 = document.createElement('tr');
+
+          for (let j = 0; j < numColumns; j++) {
+            const headerCell = document.createElement('th');
+            headerCell.textContent = `Group ${j + 1}`;
+            headerRow2.appendChild(headerCell);
+          }
+
+          table.insertBefore(headerRow2, table.firstChild);
+
+          // Clear previous table and append the new one
+          const container = argument === 'semi' ? document.getElementById('tableContainerSemi') : document.getElementById('tableContainerQuarter');
+          container.innerHTML = '';
+          container.appendChild(table);
+        });
+    }
+
+    // Call the functions when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      populateDropdown();
+    });
+  </script>
+  <style>
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+    }
+
+    select {
+      height: auto;
+      width: 200px;
+    }
+  </style>
+<p>Instead of group draw, we introduce the <a href="https://en.wikipedia.org/wiki/Boustrophedon">boustrophedon</a> or zigzag method to put countries into groups based on the position on the last FIFA's world ranking, this way we ensure justice and merit recognition but also inclusivity</p>
+</body>
+</html>
